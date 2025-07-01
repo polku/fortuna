@@ -88,7 +88,7 @@ class PortfolioPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Total: \u20ac${total.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.headline5,
+                  style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
               ),

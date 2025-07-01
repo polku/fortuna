@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
+    PortfolioPage(),
     BuyOperationPage(),
     OperationsListPage(),
   ];
@@ -41,6 +42,10 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance),
+            label: 'Portfolio',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.add),
             label: 'Add',
           ),
@@ -49,6 +54,63 @@ class _HomePageState extends State<HomePage> {
             label: 'Operations',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PortfolioPage extends StatelessWidget {
+  const PortfolioPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Portfolio')),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DbHelper.instance.getPositions(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No positions'));
+          }
+          final positions = snapshot.data!;
+          double total = 0;
+          for (var p in positions) {
+            final qty = p['quantity'] as num;
+            total += qty * 100;
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Total: \u20ac${total.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.headline5,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: positions.length,
+                  itemBuilder: (context, index) {
+                    final pos = positions[index];
+                    final qty = pos['quantity'] as num;
+                    final value = qty * 100;
+                    return ListTile(
+                      title: Text(pos['isin']),
+                      subtitle: Text('Qty: ${qty.toString()}'),
+                      trailing:
+                          Text('\u20ac${value.toStringAsFixed(2)}'),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

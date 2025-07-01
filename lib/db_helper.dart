@@ -42,4 +42,10 @@ class DbHelper {
     final db = await database;
     return await db.query('operations', orderBy: 'date DESC');
   }
+
+  Future<List<Map<String, dynamic>>> getPositions() async {
+    final db = await database;
+    return await db.rawQuery(
+        'SELECT isin, SUM(quantity) as quantity FROM operations GROUP BY isin');
+  }
 }

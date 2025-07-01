@@ -227,6 +227,8 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
   final _tickerController = TextEditingController();
   final _valueController = TextEditingController();
   final _quantityController = TextEditingController();
+  List<Map<String, String>> _searchResults = [];
+  bool _searching = false;
   DateTime? _selectedDate;
 
   @override
@@ -235,6 +237,37 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
     _valueController.dispose();
     _quantityController.dispose();
     super.dispose();
+  }
+
+  Future<void> _searchTicker() async {
+    final query = _tickerController.text.trim();
+    if (query.isEmpty) return;
+    setState(() {
+      _searching = true;
+      _searchResults = [];
+    });
+    final url =
+        'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=$query&apikey=$alphaVantageApiKey';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final matches = data['bestMatches'] as List<dynamic>?;
+        if (matches != null) {
+          _searchResults = matches
+              .map((m) => {
+                    'symbol': m['1. symbol'] as String? ?? '',
+                    'name': m['2. name'] as String? ?? '',
+                  })
+              .where((e) => e['symbol']!.isNotEmpty)
+              .toList();
+        }
+      }
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _searching = false;
+    });
   }
 
   Future<void> _pickDate() async {
@@ -282,9 +315,34 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
             children: [
               TextFormField(
                 controller: _tickerController,
-                decoration: const InputDecoration(labelText: 'Ticker'),
+                decoration: InputDecoration(
+                  labelText: 'Ticker',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _searchTicker,
+                  ),
+                ),
                 validator: (v) => v == null || v.isEmpty ? 'Enter ticker' : null,
               ),
+              if (_searching) const LinearProgressIndicator(),
+              if (_searchResults.isNotEmpty)
+                SizedBox(
+                  height: 150,
+                  child: ListView.builder(
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final r = _searchResults[index];
+                      return ListTile(
+                        title: Text(r['symbol']!),
+                        subtitle: Text(r['name']!),
+                        onTap: () {
+                          _tickerController.text = r['symbol']!;
+                          setState(() => _searchResults = []);
+                        },
+                      );
+                    },
+                  ),
+                ),
               TextFormField(
                 controller: _valueController,
                 decoration: const InputDecoration(labelText: 'Unit Value'),

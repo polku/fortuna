@@ -31,7 +31,7 @@ To test on a simulator or device:
 The bottom navigation lets you access three pages:
 
 1. **Portfolio** – shows the total value of your holdings, overall gain or loss, and lists each position with its performance. Use the refresh button to update prices from the internet. Latest prices are cached in SQLite until refreshed. Gain is calculated as `(current price × quantity) - sum(purchase price × quantity)`.
-2. **Add** – enter a new buy operation (ticker, date, quantity and unit price) which is saved locally.
+2. **Add** – search for a ticker using the AlphaVantage `SYMBOL_SEARCH` API, pick the matching result, then enter quantity, unit price and date to save the operation locally.
 3. **Operations** – shows the history of saved operations and lets you remove entries.
 
 Existing installations are automatically migrated so that previously saved

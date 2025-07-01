@@ -2,7 +2,8 @@
 
 Mobile app to keep an eye on investments.
 
-Made with Flutter. All data is stored locally using SQLite.
+Made with Flutter. All data is stored locally using SQLite. The interface uses a
+dark theme by default.
 
 ## Getting Started
 

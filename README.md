@@ -19,5 +19,8 @@ To test on a simulator or device:
 The bottom navigation lets you access three pages:
 
 1. **Portfolio** – displays the total value of your holdings and lists each position (current values are assumed to be 100 € per unit).
-2. **Add** – enter a new buy operation (ISIN, date, quantity and unit price) which is saved locally. The quantity defaults to `1` if not specified.
+2. **Add** – enter a new buy operation (ISIN, date, quantity and unit price) which is saved locally.
 3. **Operations** – shows the history of saved operations.
+
+Existing installations are automatically migrated so that previously saved
+operations receive a quantity of `1`.

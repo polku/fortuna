@@ -5,6 +5,8 @@ class DbHelper {
   DbHelper._privateConstructor();
   static final DbHelper instance = DbHelper._privateConstructor();
 
+  static const int _dbVersion = 2;
+
   static Database? _database;
 
   Future<Database> get database async {
@@ -18,7 +20,7 @@ class DbHelper {
     final path = join(dbPath, 'investments.db');
     return openDatabase(
       path,
-      version: 1,
+      version: _dbVersion,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE operations(
@@ -26,9 +28,28 @@ class DbHelper {
             isin TEXT NOT NULL,
             date INTEGER NOT NULL,
             value_unit REAL NOT NULL,
-            quantity REAL NOT NULL DEFAULT 1
+            quantity REAL NOT NULL
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE operations RENAME TO operations_old');
+          await db.execute('''
+            CREATE TABLE operations(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              isin TEXT NOT NULL,
+              date INTEGER NOT NULL,
+              value_unit REAL NOT NULL,
+              quantity REAL NOT NULL
+            )
+          ''');
+          await db.execute('''
+            INSERT INTO operations(id, isin, date, value_unit, quantity)
+            SELECT id, isin, date, value_unit, 1 FROM operations_old
+          ''');
+          await db.execute('DROP TABLE operations_old');
+        }
       },
     );
   }

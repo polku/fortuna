@@ -362,6 +362,14 @@ class _OperationsListPageState extends State<OperationsListPage> {
                 title: Text(op['ticker']),
                 subtitle: Text(
                     "${date.toLocal().toString().split(' ')[0]} - ${op['quantity']} x ${op['value_unit']}")
+                ,
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    await DbHelper.instance.deleteOperation(op['id'] as int);
+                    setState(() => _load());
+                  },
+                ),
               );
             },
           );

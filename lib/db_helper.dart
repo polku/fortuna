@@ -101,6 +101,11 @@ class DbHelper {
     return await db.query('operations', orderBy: 'date DESC');
   }
 
+  Future<int> deleteOperation(int id) async {
+    final db = await database;
+    return await db.delete('operations', where: 'id = ?', whereArgs: [id]);
+  }
+
   Future<List<Map<String, dynamic>>> getPositions() async {
     final db = await database;
     return await db.rawQuery(

@@ -102,12 +102,12 @@ class _PortfolioPageState extends State<PortfolioPage> {
   Future<void> _updatePrices() async {
     final current = await DbHelper.instance.getPositions();
     for (var p in current) {
-      final isin = p['isin'] as String;
-      final ticker = p['ticker'] as String? ?? isin;
-      final name = p['name'] as String? ?? isin;
+      final ticker = p['ticker'] as String;
+      final isin = p['isin'] as String?;
+      final name = p['name'] as String? ?? ticker;
       final price = await _fetchPrice(ticker);
       await DbHelper.instance.upsertAsset(
-          isin, ticker, name, price, DateTime.now().millisecondsSinceEpoch);
+          isin ?? ticker, ticker, name, price, DateTime.now().millisecondsSinceEpoch);
     }
     _load();
     setState(() {});
@@ -177,7 +177,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
                     final price = pos['price'] as num? ?? 0;
                     final value = qty * price;
                     final gain = value - cost;
-                    final name = pos['name'] as String? ?? pos['isin'];
+                    final name = pos['name'] as String? ?? pos['ticker'];
                     return ListTile(
                       title: Text(name),
                       subtitle: Text('Qty: $qty'),
@@ -215,14 +215,14 @@ class BuyOperationPage extends StatefulWidget {
 
 class _BuyOperationPageState extends State<BuyOperationPage> {
   final _formKey = GlobalKey<FormState>();
-  final _isinController = TextEditingController();
+  final _tickerController = TextEditingController();
   final _valueController = TextEditingController();
   final _quantityController = TextEditingController();
   DateTime? _selectedDate;
 
   @override
   void dispose() {
-    _isinController.dispose();
+    _tickerController.dispose();
     _valueController.dispose();
     _quantityController.dispose();
     super.dispose();
@@ -245,7 +245,7 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
       return;
     }
     await DbHelper.instance.insertOperation({
-      'isin': _isinController.text,
+      'ticker': _tickerController.text,
       'date': _selectedDate!.millisecondsSinceEpoch,
       'value_unit': double.parse(_valueController.text),
       'quantity': double.parse(_quantityController.text),
@@ -270,9 +270,9 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
           child: Column(
             children: [
               TextFormField(
-                controller: _isinController,
-                decoration: const InputDecoration(labelText: 'ISIN'),
-                validator: (v) => v == null || v.isEmpty ? 'Enter ISIN' : null,
+                controller: _tickerController,
+                decoration: const InputDecoration(labelText: 'Ticker'),
+                validator: (v) => v == null || v.isEmpty ? 'Enter ticker' : null,
               ),
               TextFormField(
                 controller: _valueController,
@@ -351,7 +351,7 @@ class _OperationsListPageState extends State<OperationsListPage> {
               final op = ops[index];
               final date = DateTime.fromMillisecondsSinceEpoch(op['date']);
               return ListTile(
-                title: Text(op['isin']),
+                title: Text(op['ticker']),
                 subtitle: Text(
                     "${date.toLocal().toString().split(' ')[0]} - ${op['quantity']} x ${op['value_unit']}")
               );

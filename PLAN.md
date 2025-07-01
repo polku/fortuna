@@ -8,7 +8,7 @@ This roadmap outlines the steps required to build a mobile app that tracks inves
 
 2. **Data Model**
    - Design SQLite tables: `operations`, `positions`, and `history`.
-   - Define fields: ISIN, buy/sell date, quantity, value, etc.
+   - Define fields: ticker, buy/sell date, quantity, value, etc.
    - Provide migration scripts if needed.
 
 3. **User Interface**
@@ -17,7 +17,7 @@ This roadmap outlines the steps required to build a mobile app that tracks inves
    - Provide a history screen to review completed trades.
 
 4. **Data Retrieval**
- - Integrate a free API (e.g., AlphaVantage or other) to fetch current prices for equities and crypto assets using ISIN when possible.
+ - Integrate a free API (e.g., AlphaVantage or other) to fetch current prices for equities and crypto assets using the asset ticker.
   - Prices are only refreshed when the user taps an update button to avoid spamming the API.
   - Store the fetched prices in a local table so the portfolio can be shown offline.
 

@@ -5,7 +5,7 @@ class DbHelper {
   DbHelper._privateConstructor();
   static final DbHelper instance = DbHelper._privateConstructor();
 
-  static const int _dbVersion = 3;
+  static const int _dbVersion = 4;
 
   static Database? _database;
 
@@ -25,7 +25,7 @@ class DbHelper {
         await db.execute('''
           CREATE TABLE operations(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            isin TEXT NOT NULL,
+            ticker TEXT NOT NULL,
             date INTEGER NOT NULL,
             value_unit REAL NOT NULL,
             quantity REAL NOT NULL
@@ -70,6 +70,23 @@ class DbHelper {
             )
           ''');
         }
+        if (oldVersion < 4) {
+          await db.execute('ALTER TABLE operations RENAME TO operations_old');
+          await db.execute('''
+            CREATE TABLE operations(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              ticker TEXT NOT NULL,
+              date INTEGER NOT NULL,
+              value_unit REAL NOT NULL,
+              quantity REAL NOT NULL
+            )
+          ''');
+          await db.execute('''
+            INSERT INTO operations(id, ticker, date, value_unit, quantity)
+            SELECT id, isin, date, value_unit, quantity FROM operations_old
+          ''');
+          await db.execute('DROP TABLE operations_old');
+        }
       },
     );
   }
@@ -87,12 +104,12 @@ class DbHelper {
   Future<List<Map<String, dynamic>>> getPositions() async {
     final db = await database;
     return await db.rawQuery(
-        'SELECT o.isin, SUM(o.quantity) as quantity, '
+        'SELECT o.ticker, SUM(o.quantity) as quantity, '
         'SUM(o.value_unit * o.quantity) as cost, '
-        'a.price, a.ticker, a.name, a.last_update '
+        'a.price, a.isin, a.name, a.last_update '
         'FROM operations o '
-        'LEFT JOIN assets a ON o.isin = a.isin '
-        'GROUP BY o.isin');
+        'LEFT JOIN assets a ON o.ticker = a.ticker '
+        'GROUP BY o.ticker');
   }
 
   Future<void> upsertAsset(

@@ -19,7 +19,7 @@ To test on a simulator or device:
 The bottom navigation lets you access three pages:
 
 1. **Portfolio** – shows the total value of your holdings, overall gain or loss, and lists each position with its performance. Use the refresh button to update prices from the internet. Latest prices are cached in SQLite until refreshed. Gain is calculated as `(current price × quantity) - sum(purchase price × quantity)`.
-2. **Add** – enter a new buy operation (ISIN, date, quantity and unit price) which is saved locally.
+2. **Add** – enter a new buy operation (ticker, date, quantity and unit price) which is saved locally.
 3. **Operations** – shows the history of saved operations.
 
 Existing installations are automatically migrated so that previously saved

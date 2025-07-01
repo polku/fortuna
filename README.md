@@ -10,6 +10,18 @@ Made with Flutter. All data is stored locally using SQLite.
 2. Run `flutter pub get` to install dependencies (uses `sqflite` for local storage and `http` for network requests).
 3. Launch the app with `flutter run`.
 
+### API Key
+
+The portfolio page fetches prices from AlphaVantage. Provide your own API key at
+build time:
+
+```
+flutter run --dart-define=ALPHAVANTAGE_API_KEY=<your key>
+```
+
+If no key is supplied, the demo key is used, which is subject to heavy rate
+limits.
+
 To test on a simulator or device:
 
 1. Create or start an Android emulator using Android Studio or the `flutter emulators` command.

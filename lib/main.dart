@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'db_helper.dart';
 
+/// API key passed at build time using `--dart-define=ALPHAVANTAGE_API_KEY=key`.
+const String alphaVantageApiKey =
+    String.fromEnvironment('ALPHAVANTAGE_API_KEY', defaultValue: 'demo');
+
 void main() {
   runApp(const MyApp());
 }
@@ -90,7 +94,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
 
   Future<double> _fetchPrice(String ticker) async {
     final url =
-        'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$ticker&apikey=demo';
+        'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$ticker&apikey=$alphaVantageApiKey';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

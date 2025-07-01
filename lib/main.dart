@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'db_helper.dart';
 
 void main() {
@@ -62,15 +64,70 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class PortfolioPage extends StatelessWidget {
+class PortfolioPage extends StatefulWidget {
   const PortfolioPage({Key? key}) : super(key: key);
+
+  @override
+  State<PortfolioPage> createState() => _PortfolioPageState();
+}
+
+class _PortfolioPageState extends State<PortfolioPage> {
+  late Future<List<Map<String, dynamic>>> _positions;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    _positions = DbHelper.instance.getPositions();
+  }
+
+  Future<double> _fetchPrice(String ticker) async {
+    final url =
+        'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$ticker&apikey=demo';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final quote = data['Global Quote'] as Map<String, dynamic>?;
+        final p = quote?['05. price'];
+        if (p != null) return double.tryParse(p) ?? 0.0;
+      }
+    } catch (_) {}
+    return 0.0;
+  }
+
+  Future<void> _updatePrices() async {
+    final current = await DbHelper.instance.getPositions();
+    for (var p in current) {
+      final isin = p['isin'] as String;
+      final ticker = p['ticker'] as String? ?? isin;
+      final name = p['name'] as String? ?? isin;
+      final price = await _fetchPrice(ticker);
+      await DbHelper.instance.upsertAsset(
+          isin, ticker, name, price, DateTime.now().millisecondsSinceEpoch);
+    }
+    _load();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Portfolio')),
+      appBar: AppBar(
+        title: const Text('Portfolio'),
+        actions: [
+          IconButton(
+            onPressed: _updatePrices,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Update data',
+          )
+        ],
+      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DbHelper.instance.getPositions(),
+        future: _positions,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -84,7 +141,8 @@ class PortfolioPage extends StatelessWidget {
           for (var p in positions) {
             final qty = p['quantity'] as num;
             final cost = p['cost'] as num;
-            totalValue += qty * 100;
+            final price = p['price'] as num? ?? 0;
+            totalValue += qty * price;
             totalCost += cost;
           }
           final totalGain = totalValue - totalCost;
@@ -115,12 +173,14 @@ class PortfolioPage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final pos = positions[index];
                     final qty = pos['quantity'] as num;
-                    final value = qty * 100;
                     final cost = pos['cost'] as num;
+                    final price = pos['price'] as num? ?? 0;
+                    final value = qty * price;
                     final gain = value - cost;
+                    final name = pos['name'] as String? ?? pos['isin'];
                     return ListTile(
-                      title: Text(pos['isin']),
-                      subtitle: Text('Qty: ${qty.toString()}'),
+                      title: Text(name),
+                      subtitle: Text('Qty: $qty'),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,

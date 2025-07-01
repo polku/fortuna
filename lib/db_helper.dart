@@ -5,7 +5,7 @@ class DbHelper {
   DbHelper._privateConstructor();
   static final DbHelper instance = DbHelper._privateConstructor();
 
-  static const int _dbVersion = 2;
+  static const int _dbVersion = 3;
 
   static Database? _database;
 
@@ -31,6 +31,15 @@ class DbHelper {
             quantity REAL NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE assets(
+            isin TEXT PRIMARY KEY,
+            ticker TEXT,
+            name TEXT,
+            price REAL,
+            last_update INTEGER
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -50,6 +59,17 @@ class DbHelper {
           ''');
           await db.execute('DROP TABLE operations_old');
         }
+        if (oldVersion < 3) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS assets(
+              isin TEXT PRIMARY KEY,
+              ticker TEXT,
+              name TEXT,
+              price REAL,
+              last_update INTEGER
+            )
+          ''');
+        }
       },
     );
   }
@@ -67,8 +87,39 @@ class DbHelper {
   Future<List<Map<String, dynamic>>> getPositions() async {
     final db = await database;
     return await db.rawQuery(
-        'SELECT isin, SUM(quantity) as quantity, '
-        'SUM(value_unit * quantity) as cost '
-        'FROM operations GROUP BY isin');
+        'SELECT o.isin, SUM(o.quantity) as quantity, '
+        'SUM(o.value_unit * o.quantity) as cost, '
+        'a.price, a.ticker, a.name, a.last_update '
+        'FROM operations o '
+        'LEFT JOIN assets a ON o.isin = a.isin '
+        'GROUP BY o.isin');
+  }
+
+  Future<void> upsertAsset(
+      String isin, String ticker, String name, double price, int timestamp) async {
+    final db = await database;
+    await db.insert(
+      'assets',
+      {
+        'isin': isin,
+        'ticker': ticker,
+        'name': name,
+        'price': price,
+        'last_update': timestamp,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getAsset(String isin) async {
+    final db = await database;
+    final res = await db.query('assets', where: 'isin = ?', whereArgs: [isin]);
+    if (res.isEmpty) return null;
+    return res.first;
+  }
+
+  Future<List<Map<String, dynamic>>> getAllAssets() async {
+    final db = await database;
+    return db.query('assets');
   }
 }

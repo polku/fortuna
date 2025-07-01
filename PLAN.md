@@ -17,8 +17,9 @@ This roadmap outlines the steps required to build a mobile app that tracks inves
    - Provide a history screen to review completed trades.
 
 4. **Data Retrieval**
-   - Integrate a free API (e.g., AlphaVantage or other) to fetch current prices for equities and crypto assets using ISIN when possible.
-   - Schedule periodic updates of market prices.
+ - Integrate a free API (e.g., AlphaVantage or other) to fetch current prices for equities and crypto assets using ISIN when possible.
+  - Prices are only refreshed when the user taps an update button to avoid spamming the API.
+  - Store the fetched prices in a local table so the portfolio can be shown offline.
 
 5. **Calculations**
    - Compute current portfolio value and latent gains for each position.

@@ -65,12 +65,14 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
   final _formKey = GlobalKey<FormState>();
   final _isinController = TextEditingController();
   final _valueController = TextEditingController();
+  final _quantityController = TextEditingController();
   DateTime? _selectedDate;
 
   @override
   void dispose() {
     _isinController.dispose();
     _valueController.dispose();
+    _quantityController.dispose();
     super.dispose();
   }
 
@@ -94,6 +96,7 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
       'isin': _isinController.text,
       'date': _selectedDate!.millisecondsSinceEpoch,
       'value_unit': double.parse(_valueController.text),
+      'quantity': double.parse(_quantityController.text),
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Operation saved')),
@@ -124,6 +127,12 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
                 decoration: const InputDecoration(labelText: 'Unit Value'),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (v) => v == null || v.isEmpty ? 'Enter value' : null,
+              ),
+              TextFormField(
+                controller: _quantityController,
+                decoration: const InputDecoration(labelText: 'Quantity'),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (v) => v == null || v.isEmpty ? 'Enter quantity' : null,
               ),
               Row(
                 children: [
@@ -191,7 +200,8 @@ class _OperationsListPageState extends State<OperationsListPage> {
               final date = DateTime.fromMillisecondsSinceEpoch(op['date']);
               return ListTile(
                 title: Text(op['isin']),
-                subtitle: Text("${date.toLocal().toString().split(' ')[0]} - ${op['value_unit']}"),
+                subtitle: Text(
+                    "${date.toLocal().toString().split(' ')[0]} - ${op['quantity']} x ${op['value_unit']}")
               );
             },
           );

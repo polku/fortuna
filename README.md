@@ -16,4 +16,4 @@ To test on a simulator or device:
 2. Verify it appears with `flutter devices`.
 3. Run `flutter run` again to launch the app on that device.
 
-The app lets you add a buy operation (ISIN, date, unit value) which is saved to a local SQLite database. Use the icons at the bottom of the screen to switch between adding an operation and viewing the list of saved operations.
+The app lets you add a buy operation (ISIN, date, quantity and unit price) which is saved to a local SQLite database. Use the icons at the bottom of the screen to switch between adding an operation and viewing the list of saved operations.

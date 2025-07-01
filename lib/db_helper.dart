@@ -25,7 +25,8 @@ class DbHelper {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             isin TEXT NOT NULL,
             date INTEGER NOT NULL,
-            value_unit REAL NOT NULL
+            value_unit REAL NOT NULL,
+            quantity REAL NOT NULL
           )
         ''');
       },

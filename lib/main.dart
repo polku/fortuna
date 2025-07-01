@@ -29,19 +29,23 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const PortfolioPage(),
-    const BuyOperationPage(),
-    const OperationsListPage(),
-  ];
+  Widget _buildPage() {
+    switch (_currentIndex) {
+      case 0:
+        return const PortfolioPage();
+      case 1:
+        return const BuyOperationPage();
+      case 2:
+        return const OperationsListPage();
+      default:
+        return const PortfolioPage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: _buildPage(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

@@ -117,6 +117,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
       await DbHelper.instance.upsertAsset(
           isin ?? ticker, ticker, name, price, DateTime.now().millisecondsSinceEpoch);
     }
+    if (!mounted) return;
     _load();
     setState(() {});
   }
@@ -244,6 +245,7 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
       lastDate: DateTime(2100),
     );
     if (date != null) {
+      if (!mounted) return;
       setState(() => _selectedDate = date);
     }
   }
@@ -258,6 +260,7 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
       'value_unit': double.parse(_valueController.text),
       'quantity': double.parse(_quantityController.text),
     });
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Operation saved')),
     );
@@ -367,6 +370,7 @@ class _OperationsListPageState extends State<OperationsListPage> {
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
                     await DbHelper.instance.deleteOperation(op['id'] as int);
+                    if (!mounted) return;
                     setState(() => _load());
                   },
                 ),

@@ -67,6 +67,8 @@ class DbHelper {
   Future<List<Map<String, dynamic>>> getPositions() async {
     final db = await database;
     return await db.rawQuery(
-        'SELECT isin, SUM(quantity) as quantity FROM operations GROUP BY isin');
+        'SELECT isin, SUM(quantity) as quantity, '
+        'SUM(value_unit * quantity) as cost '
+        'FROM operations GROUP BY isin');
   }
 }

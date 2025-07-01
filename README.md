@@ -18,7 +18,7 @@ To test on a simulator or device:
 
 The bottom navigation lets you access three pages:
 
-1. **Portfolio** – displays the total value of your holdings and lists each position (current values are assumed to be 100 € per unit).
+1. **Portfolio** – shows the total value of your holdings, overall gain or loss, and lists each position with its performance (current prices are assumed to be 100 € per unit. Gain is calculated as `(current price × quantity) - sum(purchase price × quantity)`).
 2. **Add** – enter a new buy operation (ISIN, date, quantity and unit price) which is saved locally.
 3. **Operations** – shows the history of saved operations.
 

@@ -79,20 +79,34 @@ class PortfolioPage extends StatelessWidget {
             return const Center(child: Text('No positions'));
           }
           final positions = snapshot.data!;
-          double total = 0;
+          double totalValue = 0;
+          double totalCost = 0;
           for (var p in positions) {
             final qty = p['quantity'] as num;
-            total += qty * 100;
+            final cost = p['cost'] as num;
+            totalValue += qty * 100;
+            totalCost += cost;
           }
+          final totalGain = totalValue - totalCost;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Total: \u20ac${total.toStringAsFixed(2)}',
+                  'Total: \u20ac${totalValue.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Gain/Loss: \u20ac${totalGain.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: totalGain >= 0 ? Colors.green : Colors.red,
+                  ),
                 ),
               ),
               Expanded(
@@ -102,11 +116,24 @@ class PortfolioPage extends StatelessWidget {
                     final pos = positions[index];
                     final qty = pos['quantity'] as num;
                     final value = qty * 100;
+                    final cost = pos['cost'] as num;
+                    final gain = value - cost;
                     return ListTile(
                       title: Text(pos['isin']),
                       subtitle: Text('Qty: ${qty.toString()}'),
-                      trailing:
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
                           Text('\u20ac${value.toStringAsFixed(2)}'),
+                          Text(
+                            '\u20ac${gain.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: gain >= 0 ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),

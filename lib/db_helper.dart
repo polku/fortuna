@@ -36,4 +36,9 @@ class DbHelper {
     final db = await database;
     return await db.insert('operations', row);
   }
+
+  Future<List<Map<String, dynamic>>> getOperations() async {
+    final db = await database;
+    return await db.query('operations', orderBy: 'date DESC');
+  }
 }

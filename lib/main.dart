@@ -12,7 +12,44 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Investment Tracker',
-      home: const BuyOperationPage(),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    BuyOperationPage(),
+    OperationsListPage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Operations',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -108,6 +145,57 @@ class _BuyOperationPageState extends State<BuyOperationPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class OperationsListPage extends StatefulWidget {
+  const OperationsListPage({Key? key}) : super(key: key);
+
+  @override
+  State<OperationsListPage> createState() => _OperationsListPageState();
+}
+
+class _OperationsListPageState extends State<OperationsListPage> {
+  late Future<List<Map<String, dynamic>>> _operations;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    _operations = DbHelper.instance.getOperations();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Operations')),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _operations,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No operations'));
+          }
+          final ops = snapshot.data!;
+          return ListView.builder(
+            itemCount: ops.length,
+            itemBuilder: (context, index) {
+              final op = ops[index];
+              final date = DateTime.fromMillisecondsSinceEpoch(op['date']);
+              return ListTile(
+                title: Text(op['isin']),
+                subtitle: Text("${date.toLocal().toString().split(' ')[0]} - ${op['value_unit']}"),
+              );
+            },
+          );
+        },
       ),
     );
   }

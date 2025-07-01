@@ -26,7 +26,7 @@ class DbHelper {
             isin TEXT NOT NULL,
             date INTEGER NOT NULL,
             value_unit REAL NOT NULL,
-            quantity REAL NOT NULL
+            quantity REAL NOT NULL DEFAULT 1
           )
         ''');
       },
